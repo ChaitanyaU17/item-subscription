@@ -1,7 +1,8 @@
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { Box, TextField, Button, Grid, Typography } from "@mui/material";
-import { useAppDispatch } from "../hooks/useAppDispatch";
+import { Box, TextField, Button, Typography } from "@mui/material";
+import Grid from '@mui/material/Grid';
+import { useAppDispatch, useAppSelector } from "../hooks/useAppDispatch";
 import { submitSubscription } from "../store/subscriptionSlice";
 import { useMemo, useState } from "react";
 import ItemSelect from "./ItemSelect";
@@ -9,6 +10,7 @@ import ItemSelect from "./ItemSelect";
 export default function SubscriptionForm() {
   const dispatch = useAppDispatch();
   const [showTotal, setShowTotal] = useState(false);
+  const { items} = useAppSelector((state) => state.items);
 
   const formik = useFormik({
     initialValues: {
@@ -46,6 +48,16 @@ export default function SubscriptionForm() {
     );
     return base - base * (formik.values.discount / 100);
   }, [formik.values]);
+
+  const handleItemChange = (index: number, itemId: string) => {
+    formik.setFieldValue(`items[${index}].item`, itemId)
+
+    const selectedItem = items.find((i) => i._id === itemId);
+    if (selectedItem) {
+      formik.setFieldValue(`items[${index}].amount`, selectedItem.basePrice || 0)
+      formik.setFieldValue("title", selectedItem.title);
+    }
+  };
 
   return (
     <Box component="form" onSubmit={formik.handleSubmit} sx={{ p: 3 }}>
@@ -91,7 +103,7 @@ export default function SubscriptionForm() {
             <ItemSelect
               name={`items[${index}].item`}
               value={formik.values.items[index].item}
-              onChange={formik.handleChange}
+              onChange={(e) => handleItemChange(index, e.target.value)}
             />
           </Grid>
           <Grid item xs={4}>

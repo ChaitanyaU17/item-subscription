@@ -13,10 +13,11 @@ interface Props {
 export default function ItemSelect({ name, value, onChange }: Props) {
   const dispatch = useAppDispatch();
   const { items, loading } = useAppSelector((state) => state.items);
+  console.log(items);
 
   useEffect(() => {
     dispatch(fetchItems());
-  }, []);
+  }, [dispatch]);
 
   if (loading) return <CircularProgress size={20} />;
 
